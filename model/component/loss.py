@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from sklearn.metrics import roc_auc_score, average_precision_score
 from torch.nn import BCEWithLogitsLoss
 
-from model.HTGN.script.poincare import PoincareBall
+from model.component.poincare import PoincareBall
 from torch_geometric.utils import negative_sampling
 
 
@@ -22,7 +22,6 @@ class ReconLoss(nn.Module):
         self.t = 1.0
         self.sigmoid = True
         self.manifold = PoincareBall()
-        self.use_hyperdecoder = args.use_hyperdecoder
 
     @staticmethod
     def maybe_num_nodes(index, num_nodes=None):
@@ -46,7 +45,7 @@ class ReconLoss(nn.Module):
         return FermiDirac(dist)
 
     def forward(self, z, pos_edge_index, neg_edge_index=None):
-        decoder = self.hyperdeoder if self.use_hyperdecoder else self.decoder
+        decoder = self.decoder
         pos_loss = -torch.log(
             decoder(z, pos_edge_index) + EPS).mean()
         # pos_edge_index
@@ -58,7 +57,7 @@ class ReconLoss(nn.Module):
         return pos_loss + neg_loss
 
     def predict(self, z, pos_edge_index, neg_edge_index):
-        decoder = self.hyperdeoder if self.use_hyperdecoder else self.decoder
+        decoder = self.decoder
         # decoder = self.decoder
         # 各项属性与z相同的 全1张量与全0张量
         pos_y = z.new_ones(pos_edge_index.size(1)).to(z.device)

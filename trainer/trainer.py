@@ -10,22 +10,22 @@ import pickle as pkl
 import numpy as np
 
 from model.DyTed import DyTed
-from model.EvolveGCN.EvolveGCN import EvolveGCN
-from model.LSTMGCN.LSTM_GCN import LSTMGCN
-from model.component.loss import ReconLoss, DySATLoss
+from model.component.loss import ReconLoss
 from model.discriminate.discriminator import Discriminator
 from utils.logistic_cls import evaluate_classifier
-from utils.utilize import get_sample, get_evaluation_data, evaluate_product
+from utils.utilize import get_sample, get_evaluation_data
 
 
 class Trainer:
-    def __init__(self, graphs, adjs, feature, args):
+    def __init__(self, graphs, adjs, feature, args, Model):
 
         self.graphs = graphs
         self.adjs = adjs
         self.features = feature
         self.args = args
         self.node_num = self.args.node_num
+
+        self.init_model = Model
 
         self._create_model()
         self._build_pyg_graphs()
@@ -38,7 +38,7 @@ class Trainer:
             os.mknod(self.args.log_path + "/{}_result.txt".format(self.args.dataset))
 
     def _create_model(self):
-        model = self.load_model()
+        model = self.init_model
         self.model = DyTed(model, self.args).to(self.args.device)
 
         self.discriminator = Discriminator(self.args.dis_in, self.args.dis_hid).to(self.args.device)
@@ -65,12 +65,6 @@ class Trainer:
 
             pyg_graphs.append(data)
             self.pyg_graphs = pyg_graphs[:-1]
-
-    def load_model(self):
-        if self.args.model == "EvolveGCN":
-            return EvolveGCN
-        elif self.args.model == "LSTMGCN":
-            return LSTMGCN
 
     def run(self):
         opt = optim.AdamW(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.weight_decay)
@@ -197,13 +191,13 @@ class Trainer:
     def get_loss(self, emb):
         # emb = self._normalize(emb)
         all_loss = 0
-        if self.args.model in ["LSTMGCN", "EvolveGCN"]:
+        if self.args.model not in ["LSTMGCN", "EvolveGCN"]:
+            pass
+        else:
             train_shots = list(range(0, len(self.graphs) - self.args.testlength))
             loss = ReconLoss(self.args)
             for t in train_shots:
                 all_loss += loss(emb[:, t, :], self.pyg_graphs[t].edge_index)
-        else:
-            pass
 
         return all_loss
 

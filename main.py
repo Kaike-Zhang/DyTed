@@ -1,8 +1,17 @@
+from model.EvolveGCN.EvolveGCN import EvolveGCN
+from model.LSTMGCN.LSTM_GCN import LSTMGCN
 from trainer.config import args
 from utils.utilize import load_graphs, generate_feats
 from trainer.trainer import Trainer
 import torch
 import numpy as np
+
+
+def load_model(model):
+    if model == "EvolveGCN":
+        return EvolveGCN
+    elif model == "LSTMGCN":
+        return LSTMGCN
 
 if __name__ == '__main__':
     np.random.seed(2022)
@@ -19,7 +28,9 @@ if __name__ == '__main__':
         # Todo: load predefined features
         pass
 
-    trainer = Trainer(graphs, adjs, feats, args)
+    model = load_model(args.model)
+
+    trainer = Trainer(graphs, adjs, feats, args, model)
     auc, ap, ti, df = trainer.run()
     result = "mean AUC: {:.4f}, mean AP: {:.4f}".format(auc, ap)
 

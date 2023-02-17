@@ -4,7 +4,7 @@ import os
 
 parser = argparse.ArgumentParser(description='DyTed')
 
-parser.add_argument('--model', type=str, default='LSTMGCN', help='model name')
+parser.add_argument('--model', type=str, default='EvolveGCN', help='model name')
 # 1.dataset
 parser.add_argument('--dataset', type=str, default='uci', help='dataset')
 
@@ -46,12 +46,20 @@ parser.add_argument('--dis_sample_num', type=int, default=500, help='number of p
 
 parser.add_argument('--t', type=float, default=0.1, help='hot InfoNce')
 
+# LSTM
+parser.add_argument('--cov_num', type=int, default=1, help='layers of  gcn cov.')
+parser.add_argument('--in_feature_list', type=list, default=[143], help='in feature of each layer.')
+parser.add_argument('--gcn_drop', type=float, default=0.2, help='dropout of gcn.')
+
+# EvolveGCN
+parser.add_argument('--nhid', type=int, default=64, help='dim of hidden embedding')
+parser.add_argument('--nout', type=int, default=16, help='dim of output embedding')
+parser.add_argument('--testlength', type=int, default=3, help='length for test, default:3')
+parser.add_argument('--egcn_type', type=str, default='EGCNH', help='Type of EGCN: EGCNH or EGCNO')
+parser.add_argument('--sampling_times', type=int, default=1, help='negative sampling times')
+
 args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = args.device_id
-
-if args.use_dyted:
-    args.out_feat = int(args.out_feat / 2)
-    args.dis_in = args.out_feat * 2
 
 # set the running device
 if torch.cuda.is_available() and args.use_gpu:
@@ -67,15 +75,9 @@ if args.use_trainable_feature:
     print('using trainable feature')
 
 
-if args.model == "DySAT":
-    args.structural_head_config = list(map(int, args.structural_head_config.split(",")))
-    args.structural_layer_config = list(map(int, args.structural_layer_config.split(",")))
-    args.temporal_head_config = list(map(int, args.temporal_head_config.split(",")))
-    args.temporal_layer_config = list(map(int, args.temporal_layer_config.split(",")))
+if args.model == "EvolveGCN":
+    args.nout = args.out_feat
 
-    args.structural_layer_config[0] = args.nfeat
-    args.structural_layer_config[-1] = args.out_feat
-    args.temporal_layer_config[-1] = args.out_feat
 elif args.model == "LSTMGCN":
     args.nout = args.out_feat
     args.in_feature_list[0] = args.nfeat

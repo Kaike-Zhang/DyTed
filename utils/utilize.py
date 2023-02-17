@@ -2,12 +2,9 @@ import numpy as np
 import networkx as nx
 import pickle as pkl
 import torch
-from sklearn.metrics import average_precision_score, roc_auc_score
 
 from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
 
-from model.HTGN.script.poincare import PoincareBall
 
 
 def sigmoid(x):
@@ -162,55 +159,3 @@ def get_sample(sta, dyn, length, sample_num):
 
     return pos_sample, neg_sample
 
-
-def evaluate_product(train_pos, train_neg, val_pos, val_neg, test_pos, test_neg, embedding):
-    test_roc_score, test_ap_score = get_roc_score_t(test_pos, test_neg, embedding, embedding)
-    val_roc_score, val_ap_score = get_roc_score_t(val_pos, val_neg, embedding, embedding)
-    tra_roc_score, tra_ap_score = get_roc_score_t(train_pos, train_neg, embedding, embedding)
-
-    return np.mean([test_roc_score, val_roc_score, tra_roc_score]), \
-           np.mean([test_ap_score, val_ap_score, tra_ap_score])
-
-
-def get_roc_score_t(edges_pos, edges_neg, source_emb, target_emb):
-    """Given test examples, edges_pos: +ve edges, edges_neg: -ve edges, return ROC scores for a given snapshot"""
-
-    def sigmoid(x):
-        return 1 / (1 + np.exp(-x))
-
-    pred = []
-    pos = []
-    for e in edges_pos:
-        pred.append(hyperdeoder(source_emb, e))
-        pos.append(1.0)
-
-    pred_neg = []
-    neg = []
-    for e in edges_neg:
-        pred_neg.append(hyperdeoder(source_emb, e))
-        neg.append(0.0)
-
-    pred_all = np.hstack([pred, pred_neg])
-    labels_all = np.hstack([pos, neg])
-    roc_score = roc_auc_score(labels_all, pred_all)
-    ap_score = average_precision_score(labels_all, pred_all)
-    return roc_score, ap_score
-
-
-def hyperdeoder(z, edge_index):
-    def FermiDirac(dist):
-        r = 2.0
-        t = 1.0
-        probs = 1. / (torch.exp((dist - r) / t) + 1.0)
-        return probs
-
-    # edge_i = edge_index[0]
-    # edge_j = edge_index[1]
-    # z_i = torch.nn.functional.embedding(edge_i, z)
-    z_i = z[edge_index[0]]
-    # z_j = torch.nn.functional.embedding(edge_j, z)
-    z_j = z[edge_index[1]]
-    manifold = PoincareBall()
-    dist = manifold.sqdist(torch.tensor(z_i), torch.tensor(z_j), c=1.0)
-
-    return FermiDirac(dist)
