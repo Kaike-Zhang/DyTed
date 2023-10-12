@@ -1,6 +1,8 @@
 # DyTed: Disentangled Representation Learning for Discrete-time Dynamic Graph
+---
+This paper has been accepted by SIGKDD 2023. [Link to the paper on ACM Digital Library](https://dl.acm.org/doi/abs/10.1145/3580305.3599319)
 
-**Authors**: 
+## Authors
 - **Kaike Zhang**
 - Qi Cao
 - Gaolin Fang
@@ -11,7 +13,7 @@
 
 ## Abstract
 Unsupervised representation learning for dynamic graphs has attracted a lot of research attention in recent years. Compared with static graph, the dynamic graph is a comprehensive embodiment of both the intrinsic stable characteristics of nodes and the time-related dynamic preference. However, existing methods generally mix these two types of information into a single representation space, which may lead to poor explanation, less robustness, and a limited ability when applied to different downstream tasks. To solve the above problems, in this paper, we propose a novel disenTangled representation learning framework for discrete-time Dynamic graphs, namely DyTed. We specially design a temporal-clips contrastive learning task together with a structure contrastive learning to effectively identify the time-invariant and time-varying representations respectively. To further enhance the disentanglement of these two types of representation, we propose a disentanglement-aware discriminator under an adversarial learning framework from the perspective of information theory. Extensive experiments on Tencent and five commonly used public datasets demonstrate that DyTed, as a general framework that can be applied to existing methods, achieves state-of-the-art performance on various downstream tasks, as well as be more robust against noise.
-[Link to the paper on ACM Digital Library](https://dl.acm.org/doi/abs/10.1145/3580305.3599319)
+
 
 
 ## Environment
