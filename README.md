@@ -1,5 +1,5 @@
 # DyTed: Disentangled Representation Learning for Discrete-time Dynamic Graph
----
+
 This paper has been accepted by SIGKDD 2023. [Link to the paper on ACM Digital Library](https://dl.acm.org/doi/abs/10.1145/3580305.3599319)
 
 ## Authors
